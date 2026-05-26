@@ -28,6 +28,11 @@
         <li><a href="#projects" data-i18n="nav.projects">projects</a></li>
         <li><a href="#contact" data-i18n="nav.contact">contact</a></li>
       </ul>
+      <label class="boid-control" title="Boid count">
+        <span class="boid-label">boids</span>
+        <input type="range" id="boid-slider" min="10" max="400" step="5" value="90" aria-label="Boid count" />
+        <span class="boid-count" id="boid-count">90</span>
+      </label>
       <div class="lang-switch">
         <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Change language">
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>

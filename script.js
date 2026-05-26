@@ -465,11 +465,13 @@ let W = 0, H = 0;
 
 const BOID_COUNT_DESKTOP = 90;
 const BOID_COUNT_MOBILE  = 45;
-const NEIGHBOR_RADIUS = 60;
-const SEPARATION_RADIUS = 22;
+const NEIGHBOR_RADIUS = 55;
+const SEPARATION_RADIUS = 20;
 const MAX_SPEED = 1.6;
-const MAX_FORCE = 0.04;
-const MOUSE_REPEL_RADIUS = 110;
+const MIN_SPEED = 0.9;
+const MAX_FORCE = 0.05;
+const MOUSE_REPEL_RADIUS = 120;
+const MOUSE_REPEL_FORCE = 0.12;
 
 function resize() {
   W = window.innerWidth;
@@ -488,20 +490,53 @@ window.addEventListener('resize', () => {
 });
 resize();
 
-function initBoids() {
-  const count = W < 700 ? BOID_COUNT_MOBILE : BOID_COUNT_DESKTOP;
-  boids = [];
-  for (let i = 0; i < count; i++) {
-    const a = Math.random() * Math.PI * 2;
-    boids.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vx: Math.cos(a) * MAX_SPEED,
-      vy: Math.sin(a) * MAX_SPEED,
-    });
+function spawnBoid() {
+  const a = Math.random() * Math.PI * 2;
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: Math.cos(a) * MAX_SPEED,
+    vy: Math.sin(a) * MAX_SPEED,
+  };
+}
+
+function setBoidCount(n) {
+  n = Math.max(1, Math.min(800, Math.floor(n)));
+  if (n > boids.length) {
+    while (boids.length < n) boids.push(spawnBoid());
+  } else if (n < boids.length) {
+    boids.length = n;
   }
 }
+
+function initBoids() {
+  const fallback = W < 700 ? BOID_COUNT_MOBILE : BOID_COUNT_DESKTOP;
+  let count = fallback;
+  try {
+    const saved = parseInt(localStorage.getItem('boidCount'), 10);
+    if (!Number.isNaN(saved) && saved > 0) count = saved;
+  } catch (_) {}
+  boids = [];
+  for (let i = 0; i < count; i++) boids.push(spawnBoid());
+
+  const slider = document.getElementById('boid-slider');
+  const label = document.getElementById('boid-count');
+  if (slider) slider.value = String(count);
+  if (label) label.textContent = String(count);
+}
 initBoids();
+
+// ---------- Boid slider wiring ----------
+const boidSlider = document.getElementById('boid-slider');
+const boidCountLabel = document.getElementById('boid-count');
+if (boidSlider) {
+  boidSlider.addEventListener('input', () => {
+    const n = parseInt(boidSlider.value, 10);
+    setBoidCount(n);
+    if (boidCountLabel) boidCountLabel.textContent = String(n);
+    try { localStorage.setItem('boidCount', String(n)); } catch (_) {}
+  });
+}
 
 function limit(vx, vy, max) {
   const m = Math.hypot(vx, vy);
@@ -543,7 +578,7 @@ function step() {
       const [sx, sy] = limit(sepX, sepY, MAX_SPEED);
       const dx = sx - b.vx, dy = sy - b.vy;
       const [fx, fy] = limit(dx, dy, MAX_FORCE);
-      ax += fx * 1.6; ay += fy * 1.6;
+      ax += fx * 1.8; ay += fy * 1.8;
     }
     // alignment
     if (nAli) {
@@ -553,27 +588,41 @@ function step() {
       const [fx, fy] = limit(dx, dy, MAX_FORCE);
       ax += fx; ay += fy;
     }
-    // cohesion
+    // cohesion — kept gentle so they don't collapse into a knot
     if (nCoh) {
       cohX = cohX / nCoh - b.x;
       cohY = cohY / nCoh - b.y;
       const [sx, sy] = limit(cohX, cohY, MAX_SPEED);
       const dx = sx - b.vx, dy = sy - b.vy;
       const [fx, fy] = limit(dx, dy, MAX_FORCE);
-      ax += fx * 0.9; ay += fy * 0.9;
+      ax += fx * 0.55; ay += fy * 0.55;
     }
-    // mouse repel — soft, makes the flock part around the cursor
+    // mouse repel — capped so it doesn't dominate over the flocking forces
     const mdx = b.x - mouseX, mdy = b.y - mouseY;
     const md = Math.hypot(mdx, mdy);
     if (md < MOUSE_REPEL_RADIUS && md > 0.0001) {
-      const k = (1 - md / MOUSE_REPEL_RADIUS) * 0.6;
+      const k = (1 - md / MOUSE_REPEL_RADIUS) * MOUSE_REPEL_FORCE;
       ax += (mdx / md) * k;
       ay += (mdy / md) * k;
     }
 
     b.vx += ax; b.vy += ay;
-    const [vx, vy] = limit(b.vx, b.vy, MAX_SPEED);
-    b.vx = vx; b.vy = vy;
+
+    // clamp to [MIN_SPEED, MAX_SPEED] — keeps boids moving so their heading stays stable
+    const sp = Math.hypot(b.vx, b.vy);
+    if (sp > MAX_SPEED) {
+      b.vx = (b.vx / sp) * MAX_SPEED;
+      b.vy = (b.vy / sp) * MAX_SPEED;
+    } else if (sp < MIN_SPEED) {
+      if (sp < 0.0001) {
+        const a = Math.random() * Math.PI * 2;
+        b.vx = Math.cos(a) * MIN_SPEED;
+        b.vy = Math.sin(a) * MIN_SPEED;
+      } else {
+        b.vx = (b.vx / sp) * MIN_SPEED;
+        b.vy = (b.vy / sp) * MIN_SPEED;
+      }
+    }
 
     b.x += b.vx;
     b.y += b.vy;
