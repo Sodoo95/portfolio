@@ -110,6 +110,76 @@ img { max-width: 100%; display: block; }
 .nav-links a:hover { color: var(--text); }
 .nav-links a:hover::after { width: 100%; }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+}
+
+/* ---------- Language switcher ---------- */
+.lang-switch { position: relative; }
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.lang-btn:hover { color: var(--text); border-color: var(--accent-2); }
+.lang-btn[aria-expanded="true"] { color: var(--text); border-color: var(--accent-2); }
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: rgba(15, 15, 22, 0.96);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 0.35rem;
+  list-style: none;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  z-index: 60;
+}
+.lang-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.lang-menu li { margin: 0; }
+.lang-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lang-menu button:hover { background: rgba(59, 130, 246, 0.12); color: var(--accent-2); }
+.lang-menu button.active {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--accent-2);
+}
+
 @media (max-width: 600px) {
   .nav-links { display: none; }
 }

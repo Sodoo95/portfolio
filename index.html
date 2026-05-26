@@ -21,12 +21,28 @@
       <span class="logo-name">sodo</span>
       <span class="logo-bracket">/&gt;</span>
     </a>
-    <ul class="nav-links">
-      <li><a href="#about">about</a></li>
-      <li><a href="#skills">skills</a></li>
-      <li><a href="#projects">projects</a></li>
-      <li><a href="#contact">contact</a></li>
-    </ul>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#about" data-i18n="nav.about">about</a></li>
+        <li><a href="#skills" data-i18n="nav.skills">skills</a></li>
+        <li><a href="#projects" data-i18n="nav.projects">projects</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">contact</a></li>
+      </ul>
+      <div class="lang-switch">
+        <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Change language">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          <span class="lang-current">EN</span>
+          <svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="lang-menu" id="lang-menu" role="menu">
+          <li><button type="button" data-lang="en" role="menuitem">English</button></li>
+          <li><button type="button" data-lang="ja" role="menuitem">日本語</button></li>
+          <li><button type="button" data-lang="mn" role="menuitem">Монгол</button></li>
+          <li><button type="button" data-lang="ko" role="menuitem">한국어</button></li>
+          <li><button type="button" data-lang="zh" role="menuitem">中文</button></li>
+        </ul>
+      </div>
+    </div>
   </nav>
 
   <main id="top">
@@ -40,17 +56,17 @@
           <span class="word">Sodo</span>
           <span class="word gradient">Hikaru</span>
         </h1>
-        <p class="hero-bio reveal">
+        <p class="hero-bio reveal" data-i18n="hero.bio">
           Building simulations, games, and graphics experiments in C++, CUDA, and OpenGL —
           chasing the line between math, performance, and pixels.
         </p>
         <div class="hero-meta reveal">
-          <span class="chip"><span class="dot"></span>Tokyo, JP</span>
-          <span class="chip"><span class="dot pulse"></span>Available for collaboration</span>
+          <span class="chip"><span class="dot"></span><span data-i18n="hero.chip.location">Tokyo, JP</span></span>
+          <span class="chip"><span class="dot pulse"></span><span data-i18n="hero.chip.available">Available for collaboration</span></span>
         </div>
         <div class="hero-cta reveal">
           <a href="#projects" class="btn btn-primary">
-            <span>View Projects</span>
+            <span data-i18n="hero.cta.projects">View Projects</span>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
           <a href="https://github.com/Sodoo95" target="_blank" rel="noopener" class="btn btn-ghost">
@@ -60,7 +76,7 @@
         </div>
       </div>
       <div class="scroll-hint" aria-hidden="true">
-        <span>scroll</span>
+        <span data-i18n="scroll.hint">scroll</span>
         <div class="scroll-bar"><div class="scroll-fill"></div></div>
       </div>
     </section>
@@ -69,30 +85,30 @@
     <section id="about" class="section">
       <div class="section-head reveal">
         <span class="section-num">01</span>
-        <h2>about</h2>
+        <h2 data-i18n="about.title">about</h2>
         <span class="section-rule"></span>
       </div>
       <div class="about-grid">
         <div class="about-card reveal">
-          <p>
+          <p data-i18n-html="about.p1">
             I'm <strong>Sodo-Hikaru</strong> — a developer from Tokyo who likes to take ideas to their
             limit and see what happens. Most of my work lives at the intersection of graphics,
             simulation, and systems programming.
           </p>
-          <p>
+          <p data-i18n="about.p2">
             Lately I've been pushing ECS architectures, parallel computing with CUDA, and writing my
             own little games to learn the fundamentals from the ground up.
           </p>
-          <p class="muted">"Trying to be better everyday."</p>
+          <p class="muted" data-i18n="about.quote">"Trying to be better everyday."</p>
         </div>
         <div class="stats">
           <div class="stat reveal">
             <span class="stat-num" data-target="7">0</span>
-            <span class="stat-label">projects</span>
+            <span class="stat-label" data-i18n="stat.projects">projects</span>
           </div>
           <div class="stat reveal">
             <span class="stat-num" data-target="5">0</span>
-            <span class="stat-label">years coding</span>
+            <span class="stat-label" data-i18n="stat.years">years coding</span>
           </div>
         </div>
       </div>
@@ -102,12 +118,12 @@
     <section id="skills" class="section">
       <div class="section-head reveal">
         <span class="section-num">02</span>
-        <h2>skills</h2>
+        <h2 data-i18n="skills.title">skills</h2>
         <span class="section-rule"></span>
       </div>
       <div class="skills-grid">
         <div class="skill-card reveal" data-tilt>
-          <h3>Languages</h3>
+          <h3 data-i18n="skills.languages">Languages</h3>
           <ul>
             <li>C++</li>
             <li>CUDA</li>
@@ -116,7 +132,7 @@
           </ul>
         </div>
         <div class="skill-card reveal" data-tilt>
-          <h3>Graphics &amp; Game</h3>
+          <h3 data-i18n="skills.graphics">Graphics &amp; Game</h3>
           <ul>
             <li>OpenGL</li>
             <li>Raylib</li>
@@ -125,16 +141,16 @@
           </ul>
         </div>
         <div class="skill-card reveal" data-tilt>
-          <h3>Concepts</h3>
+          <h3 data-i18n="skills.concepts">Concepts</h3>
           <ul>
-            <li>ECS Architecture</li>
-            <li>Parallel Computing</li>
-            <li>Simulations</li>
-            <li>Game Loop / Math</li>
+            <li data-i18n="skills.ecs">ECS Architecture</li>
+            <li data-i18n="skills.parallel">Parallel Computing</li>
+            <li data-i18n="skills.simulations">Simulations</li>
+            <li data-i18n="skills.gameloop">Game Loop / Math</li>
           </ul>
         </div>
         <div class="skill-card reveal" data-tilt>
-          <h3>Tools</h3>
+          <h3 data-i18n="skills.tools">Tools</h3>
           <ul>
             <li>Git</li>
             <li>Visual Studio</li>
@@ -149,11 +165,10 @@
     <section id="projects" class="section">
       <div class="section-head reveal">
         <span class="section-num">03</span>
-        <h2>projects</h2>
+        <h2 data-i18n="projects.title">projects</h2>
         <span class="section-rule"></span>
       </div>
       <div class="projects-grid" id="projects-grid">
-        <!-- Cards injected by JS, with progressive enhancement fallback below -->
         <noscript>
           <a class="project-card" href="https://github.com/Sodoo95/3D-Boids-Simulation-Cuda-OpenGL-Raylib" target="_blank" rel="noopener">
             <h3>3D Boids Simulation</h3>
@@ -167,12 +182,12 @@
     <section id="contact" class="section">
       <div class="section-head reveal">
         <span class="section-num">04</span>
-        <h2>contact</h2>
+        <h2 data-i18n="contact.title">contact</h2>
         <span class="section-rule"></span>
       </div>
       <div class="contact-wrap reveal">
-        <h3 class="contact-title">Let's build something <span class="gradient">interesting</span>.</h3>
-        <p class="contact-sub">Open to collaboration, freelance, and weird side projects.</p>
+        <h3 class="contact-title" data-i18n-html="contact.heading">Let's build something <span class="gradient">interesting</span>.</h3>
+        <p class="contact-sub" data-i18n="contact.sub">Open to collaboration, freelance, and weird side projects.</p>
         <div class="contact-actions">
           <a class="btn btn-primary" href="mailto:Sodoo.dn@gmail.com">
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18v12H3z M3 6l9 7 9-7"/></svg>
@@ -193,7 +208,7 @@
 
   <footer class="footer">
     <span>© <span id="year"></span> Sodo-Hikaru</span>
-    <span class="muted">Built with vanilla HTML / CSS / JS</span>
+    <span class="muted" data-i18n="footer.built">Built with vanilla HTML / CSS / JS</span>
   </footer>
 
   <script src="script.js" defer></script>
