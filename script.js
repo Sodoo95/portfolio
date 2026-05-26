@@ -20,38 +20,6 @@ function animateGlow() {
 }
 animateGlow();
 
-// ---------- Typed hero ----------
-const typedEl = document.getElementById('typed-text');
-const lines = [
-  'cd ~/portfolio && ./run',
-  'C++ developer · Tokyo',
-  'building boids, ECS, and shaders',
-  'open to collaboration',
-];
-let lineIdx = 0;
-let charIdx = 0;
-let deleting = false;
-
-function typeLoop() {
-  const current = lines[lineIdx];
-  if (!deleting) {
-    typedEl.textContent = current.slice(0, ++charIdx);
-    if (charIdx === current.length) {
-      deleting = true;
-      setTimeout(typeLoop, 1600);
-      return;
-    }
-  } else {
-    typedEl.textContent = current.slice(0, --charIdx);
-    if (charIdx === 0) {
-      deleting = false;
-      lineIdx = (lineIdx + 1) % lines.length;
-    }
-  }
-  setTimeout(typeLoop, deleting ? 35 : 65);
-}
-typeLoop();
-
 // ---------- Reveal on scroll ----------
 const revealEls = document.querySelectorAll('.reveal');
 const io = new IntersectionObserver((entries) => {
@@ -111,6 +79,7 @@ const projects = [
   {
     name: '3D Boids Simulation',
     repo: '3D-Boids-Simulation-Cuda-OpenGL-Raylib',
+    gif: 'BOID3D.gif',
     desc: 'GPU-accelerated 3D flocking simulation. Boids swarm logic ported to CUDA, rendered in real-time with OpenGL and Raylib.',
     language: 'Cuda',
     tags: ['CUDA', 'OpenGL', 'Raylib', 'Simulation'],
@@ -120,6 +89,7 @@ const projects = [
   {
     name: 'Fishpond Simulation',
     repo: 'Fishpond-Simulation',
+    gif: 'BoidSim.gif',
     desc: 'Pushed ECS architecture to the limit — fish, food chains, and emergent behaviors in a virtual pond.',
     language: 'C++',
     tags: ['ECS', 'Simulation', 'C++'],
@@ -128,6 +98,7 @@ const projects = [
   {
     name: 'SFML Boid',
     repo: 'SFML_Boid',
+    gif: 'SFML_Boid1.gif',
     desc: '2D boids built on SFML — first real dive into Entity Component System architecture.',
     language: 'C++',
     tags: ['SFML', 'ECS', 'Boids'],
@@ -136,6 +107,7 @@ const projects = [
   {
     name: 'WinAPI Puzzle',
     repo: 'WINAPI_Puzzle',
+    gif: 'Puzzle.gif',
     desc: 'Sliding tile puzzle game written from scratch using the Win32 API. School assignment turned passion project.',
     language: 'C++',
     tags: ['WinAPI', 'Game', 'C++'],
@@ -144,6 +116,7 @@ const projects = [
   {
     name: 'Minesweeper',
     repo: 'Minesweeper',
+    gif: 'Minesweeper.gif',
     desc: 'Classic Minesweeper rebuilt with custom pixel art and a hand-rolled game loop.',
     language: 'C++',
     tags: ['Game', 'WinAPI', 'Pixel Art'],
@@ -152,6 +125,7 @@ const projects = [
   {
     name: 'Analog Clock',
     repo: 'Analog-Clock',
+    gif: 'AnalogClock.gif',
     desc: 'A working analog clock rendered with WinAPI — a small exercise in trig, timers, and double-buffered drawing.',
     language: 'C++',
     tags: ['WinAPI', 'Graphics'],
@@ -160,6 +134,7 @@ const projects = [
   {
     name: 'Star Collector',
     repo: 'Console-Game-Star-Collector',
+    gif: 'ConsoleGame.gif',
     desc: 'A console-based star-collecting mini-game made while learning STL and C++ fundamentals.',
     language: 'C++',
     tags: ['Console', 'STL', 'Game'],
@@ -167,10 +142,15 @@ const projects = [
   },
 ];
 
+const gifUrl = (p) => `https://raw.githubusercontent.com/Sodoo95/${p.repo}/HEAD/${encodeURIComponent(p.gif)}`;
+
 // ---------- Render projects ----------
 const grid = document.getElementById('projects-grid');
 grid.innerHTML = projects.map((p) => `
-  <a class="project-card reveal" href="https://github.com/Sodoo95/${p.repo}" target="_blank" rel="noopener" style="--lang-color:${langColors[p.language] || '#22d3ee'}">
+  <a class="project-card reveal" href="https://github.com/Sodoo95/${p.repo}" target="_blank" rel="noopener" style="--lang-color:${langColors[p.language] || '#3b82f6'}">
+    <div class="project-thumb">
+      <img src="${gifUrl(p)}" alt="${p.name} preview" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none'" />
+    </div>
     <div class="project-head">
       <h3 class="project-title">${p.name}</h3>
       <span class="project-icon">↗</span>
@@ -246,7 +226,7 @@ function draw() {
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(180, 170, 255, 0.5)';
+    ctx.fillStyle = 'rgba(147, 197, 253, 0.45)';
     ctx.fill();
 
     for (let j = i + 1; j < particles.length; j++) {
@@ -257,7 +237,7 @@ function draw() {
         ctx.beginPath();
         ctx.moveTo(p.x, p.y);
         ctx.lineTo(q.x, q.y);
-        ctx.strokeStyle = `rgba(124, 92, 255, ${0.16 * (1 - dist / 140)})`;
+        ctx.strokeStyle = `rgba(59, 130, 246, ${0.18 * (1 - dist / 140)})`;
         ctx.lineWidth = 0.6;
         ctx.stroke();
       }
