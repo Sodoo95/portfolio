@@ -455,69 +455,160 @@ try {
 } catch (_) {}
 applyLanguage(initialLang);
 
-// ---------- Animated particle background ----------
+// ---------- 2D Boids background ----------
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
-let particles = [];
-let w = 0, h = 0;
-const COUNT = 60;
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+let boids = [];
+let W = 0, H = 0;
+
+const BOID_COUNT_DESKTOP = 90;
+const BOID_COUNT_MOBILE  = 45;
+const NEIGHBOR_RADIUS = 60;
+const SEPARATION_RADIUS = 22;
+const MAX_SPEED = 1.6;
+const MAX_FORCE = 0.04;
+const MOUSE_REPEL_RADIUS = 110;
+
 function resize() {
-  w = canvas.width = window.innerWidth * window.devicePixelRatio;
-  h = canvas.height = window.innerHeight * window.devicePixelRatio;
-  canvas.style.width = window.innerWidth + 'px';
-  canvas.style.height = window.innerHeight + 'px';
+  W = window.innerWidth;
+  H = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.scale(dpr, dpr);
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => {
+  resize();
+  initBoids();
+});
 resize();
 
-function initParticles() {
-  particles = [];
-  for (let i = 0; i < COUNT; i++) {
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.6 + 0.4,
+function initBoids() {
+  const count = W < 700 ? BOID_COUNT_MOBILE : BOID_COUNT_DESKTOP;
+  boids = [];
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    boids.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: Math.cos(a) * MAX_SPEED,
+      vy: Math.sin(a) * MAX_SPEED,
     });
   }
 }
-initParticles();
+initBoids();
 
-function draw() {
-  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-  for (let i = 0; i < particles.length; i++) {
-    const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < 0 || p.x > window.innerWidth) p.vx *= -1;
-    if (p.y < 0 || p.y > window.innerHeight) p.vy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(147, 197, 253, 0.45)';
-    ctx.fill();
-
-    for (let j = i + 1; j < particles.length; j++) {
-      const q = particles[j];
-      const dx = p.x - q.x, dy = p.y - q.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 140) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(q.x, q.y);
-        ctx.strokeStyle = `rgba(59, 130, 246, ${0.18 * (1 - dist / 140)})`;
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
-      }
-    }
+function limit(vx, vy, max) {
+  const m = Math.hypot(vx, vy);
+  if (m > max) {
+    const k = max / m;
+    return [vx * k, vy * k];
   }
-  if (!REDUCED) requestAnimationFrame(draw);
+  return [vx, vy];
 }
-if (!REDUCED) draw();
-else draw();
+
+function step() {
+  for (let i = 0; i < boids.length; i++) {
+    const b = boids[i];
+    let sepX = 0, sepY = 0;
+    let aliX = 0, aliY = 0;
+    let cohX = 0, cohY = 0;
+    let nAli = 0, nCoh = 0;
+
+    for (let j = 0; j < boids.length; j++) {
+      if (i === j) continue;
+      const o = boids[j];
+      const dx = b.x - o.x, dy = b.y - o.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > NEIGHBOR_RADIUS * NEIGHBOR_RADIUS) continue;
+      const d = Math.sqrt(d2) || 0.0001;
+
+      if (d < SEPARATION_RADIUS) {
+        sepX += dx / d / d;
+        sepY += dy / d / d;
+      }
+      aliX += o.vx; aliY += o.vy; nAli++;
+      cohX += o.x;  cohY += o.y;  nCoh++;
+    }
+
+    let ax = 0, ay = 0;
+
+    // separation
+    if (sepX || sepY) {
+      const [sx, sy] = limit(sepX, sepY, MAX_SPEED);
+      const dx = sx - b.vx, dy = sy - b.vy;
+      const [fx, fy] = limit(dx, dy, MAX_FORCE);
+      ax += fx * 1.6; ay += fy * 1.6;
+    }
+    // alignment
+    if (nAli) {
+      aliX /= nAli; aliY /= nAli;
+      const [sx, sy] = limit(aliX, aliY, MAX_SPEED);
+      const dx = sx - b.vx, dy = sy - b.vy;
+      const [fx, fy] = limit(dx, dy, MAX_FORCE);
+      ax += fx; ay += fy;
+    }
+    // cohesion
+    if (nCoh) {
+      cohX = cohX / nCoh - b.x;
+      cohY = cohY / nCoh - b.y;
+      const [sx, sy] = limit(cohX, cohY, MAX_SPEED);
+      const dx = sx - b.vx, dy = sy - b.vy;
+      const [fx, fy] = limit(dx, dy, MAX_FORCE);
+      ax += fx * 0.9; ay += fy * 0.9;
+    }
+    // mouse repel — soft, makes the flock part around the cursor
+    const mdx = b.x - mouseX, mdy = b.y - mouseY;
+    const md = Math.hypot(mdx, mdy);
+    if (md < MOUSE_REPEL_RADIUS && md > 0.0001) {
+      const k = (1 - md / MOUSE_REPEL_RADIUS) * 0.6;
+      ax += (mdx / md) * k;
+      ay += (mdy / md) * k;
+    }
+
+    b.vx += ax; b.vy += ay;
+    const [vx, vy] = limit(b.vx, b.vy, MAX_SPEED);
+    b.vx = vx; b.vy = vy;
+
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // wrap edges
+    if (b.x < -5) b.x = W + 5;
+    else if (b.x > W + 5) b.x = -5;
+    if (b.y < -5) b.y = H + 5;
+    else if (b.y > H + 5) b.y = -5;
+  }
+}
+
+function drawBoids() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(147, 197, 253, 0.55)';
+  for (let i = 0; i < boids.length; i++) {
+    const b = boids[i];
+    const ang = Math.atan2(b.vy, b.vx);
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(ang);
+    ctx.beginPath();
+    ctx.moveTo(6, 0);
+    ctx.lineTo(-4, 3);
+    ctx.lineTo(-4, -3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function frame() {
+  step();
+  drawBoids();
+  if (!REDUCED) requestAnimationFrame(frame);
+}
+if (REDUCED) drawBoids();
+else frame();
