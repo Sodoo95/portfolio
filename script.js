@@ -455,23 +455,12 @@ try {
 } catch (_) {}
 applyLanguage(initialLang);
 
-// ---------- 2D Boids background ----------
+// ---------- Background simulations ----------
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-let boids = [];
 let W = 0, H = 0;
-
-const BOID_COUNT_DESKTOP = 90;
-const BOID_COUNT_MOBILE  = 45;
-const NEIGHBOR_RADIUS = 55;
-const SEPARATION_RADIUS = 20;
-const MAX_SPEED = 1.6;
-const MIN_SPEED = 0.9;
-const MAX_FORCE = 0.05;
-const MOUSE_REPEL_RADIUS = 120;
-const MOUSE_REPEL_FORCE = 0.12;
 
 function resize() {
   W = window.innerWidth;
@@ -484,180 +473,379 @@ function resize() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 }
-window.addEventListener('resize', () => {
-  resize();
-  initBoids();
-});
 resize();
 
-function spawnBoid() {
-  const a = Math.random() * Math.PI * 2;
-  return {
-    x: Math.random() * W,
-    y: Math.random() * H,
-    vx: Math.cos(a) * MAX_SPEED,
-    vy: Math.sin(a) * MAX_SPEED,
-  };
-}
-
-function setBoidCount(n) {
-  n = Math.max(1, Math.min(800, Math.floor(n)));
-  if (n > boids.length) {
-    while (boids.length < n) boids.push(spawnBoid());
-  } else if (n < boids.length) {
-    boids.length = n;
-  }
-}
-
-function initBoids() {
-  const fallback = W < 700 ? BOID_COUNT_MOBILE : BOID_COUNT_DESKTOP;
-  let count = fallback;
-  try {
-    const saved = parseInt(localStorage.getItem('boidCount'), 10);
-    if (!Number.isNaN(saved) && saved > 0) count = saved;
-  } catch (_) {}
-  boids = [];
-  for (let i = 0; i < count; i++) boids.push(spawnBoid());
-
-  const slider = document.getElementById('boid-slider');
-  const label = document.getElementById('boid-count');
-  if (slider) slider.value = String(count);
-  if (label) label.textContent = String(count);
-}
-initBoids();
-
-// ---------- Boid slider wiring ----------
-const boidSlider = document.getElementById('boid-slider');
-const boidCountLabel = document.getElementById('boid-count');
-if (boidSlider) {
-  boidSlider.addEventListener('input', () => {
-    const n = parseInt(boidSlider.value, 10);
-    setBoidCount(n);
-    if (boidCountLabel) boidCountLabel.textContent = String(n);
-    try { localStorage.setItem('boidCount', String(n)); } catch (_) {}
-  });
-}
-
-function limit(vx, vy, max) {
+function limitVec(vx, vy, max) {
   const m = Math.hypot(vx, vy);
-  if (m > max) {
-    const k = max / m;
-    return [vx * k, vy * k];
-  }
+  if (m > max) { const k = max / m; return [vx * k, vy * k]; }
   return [vx, vy];
 }
 
-function step() {
-  for (let i = 0; i < boids.length; i++) {
-    const b = boids[i];
-    let sepX = 0, sepY = 0;
-    let aliX = 0, aliY = 0;
-    let cohX = 0, cohY = 0;
-    let nAli = 0, nCoh = 0;
+// ============ BOIDS ============
+const boidsSim = (() => {
+  const NEIGHBOR_RADIUS = 55;
+  const SEPARATION_RADIUS = 20;
+  const MAX_SPEED = 1.6;
+  const MIN_SPEED = 0.9;
+  const MAX_FORCE = 0.05;
+  const MOUSE_REPEL_RADIUS = 120;
+  const MOUSE_REPEL_FORCE = 0.12;
 
-    for (let j = 0; j < boids.length; j++) {
-      if (i === j) continue;
-      const o = boids[j];
-      const dx = b.x - o.x, dy = b.y - o.y;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > NEIGHBOR_RADIUS * NEIGHBOR_RADIUS) continue;
-      const d = Math.sqrt(d2) || 0.0001;
+  let boids = [];
 
-      if (d < SEPARATION_RADIUS) {
-        sepX += dx / d / d;
-        sepY += dy / d / d;
-      }
-      aliX += o.vx; aliY += o.vy; nAli++;
-      cohX += o.x;  cohY += o.y;  nCoh++;
-    }
-
-    let ax = 0, ay = 0;
-
-    // separation
-    if (sepX || sepY) {
-      const [sx, sy] = limit(sepX, sepY, MAX_SPEED);
-      const dx = sx - b.vx, dy = sy - b.vy;
-      const [fx, fy] = limit(dx, dy, MAX_FORCE);
-      ax += fx * 1.8; ay += fy * 1.8;
-    }
-    // alignment
-    if (nAli) {
-      aliX /= nAli; aliY /= nAli;
-      const [sx, sy] = limit(aliX, aliY, MAX_SPEED);
-      const dx = sx - b.vx, dy = sy - b.vy;
-      const [fx, fy] = limit(dx, dy, MAX_FORCE);
-      ax += fx; ay += fy;
-    }
-    // cohesion — kept gentle so they don't collapse into a knot
-    if (nCoh) {
-      cohX = cohX / nCoh - b.x;
-      cohY = cohY / nCoh - b.y;
-      const [sx, sy] = limit(cohX, cohY, MAX_SPEED);
-      const dx = sx - b.vx, dy = sy - b.vy;
-      const [fx, fy] = limit(dx, dy, MAX_FORCE);
-      ax += fx * 0.55; ay += fy * 0.55;
-    }
-    // mouse repel — capped so it doesn't dominate over the flocking forces
-    const mdx = b.x - mouseX, mdy = b.y - mouseY;
-    const md = Math.hypot(mdx, mdy);
-    if (md < MOUSE_REPEL_RADIUS && md > 0.0001) {
-      const k = (1 - md / MOUSE_REPEL_RADIUS) * MOUSE_REPEL_FORCE;
-      ax += (mdx / md) * k;
-      ay += (mdy / md) * k;
-    }
-
-    b.vx += ax; b.vy += ay;
-
-    // clamp to [MIN_SPEED, MAX_SPEED] — keeps boids moving so their heading stays stable
-    const sp = Math.hypot(b.vx, b.vy);
-    if (sp > MAX_SPEED) {
-      b.vx = (b.vx / sp) * MAX_SPEED;
-      b.vy = (b.vy / sp) * MAX_SPEED;
-    } else if (sp < MIN_SPEED) {
-      if (sp < 0.0001) {
-        const a = Math.random() * Math.PI * 2;
-        b.vx = Math.cos(a) * MIN_SPEED;
-        b.vy = Math.sin(a) * MIN_SPEED;
-      } else {
-        b.vx = (b.vx / sp) * MIN_SPEED;
-        b.vy = (b.vy / sp) * MIN_SPEED;
-      }
-    }
-
-    b.x += b.vx;
-    b.y += b.vy;
-
-    // wrap edges
-    if (b.x < -5) b.x = W + 5;
-    else if (b.x > W + 5) b.x = -5;
-    if (b.y < -5) b.y = H + 5;
-    else if (b.y > H + 5) b.y = -5;
+  function spawn() {
+    const a = Math.random() * Math.PI * 2;
+    return { x: Math.random() * W, y: Math.random() * H, vx: Math.cos(a) * MAX_SPEED, vy: Math.sin(a) * MAX_SPEED };
   }
-}
 
-function drawBoids() {
+  return {
+    label: 'boids', min: 10, max: 400, step: 5, default: 90,
+    init(n) { boids = []; for (let i = 0; i < n; i++) boids.push(spawn()); },
+    onResize() { /* boids wrap, no reseed needed */ },
+    setCount(n) {
+      if (n > boids.length) { while (boids.length < n) boids.push(spawn()); }
+      else if (n < boids.length) { boids.length = n; }
+    },
+    step() {
+      for (let i = 0; i < boids.length; i++) {
+        const b = boids[i];
+        let sepX = 0, sepY = 0, aliX = 0, aliY = 0, cohX = 0, cohY = 0;
+        let nAli = 0, nCoh = 0;
+
+        for (let j = 0; j < boids.length; j++) {
+          if (i === j) continue;
+          const o = boids[j];
+          const dx = b.x - o.x, dy = b.y - o.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > NEIGHBOR_RADIUS * NEIGHBOR_RADIUS) continue;
+          const d = Math.sqrt(d2) || 0.0001;
+          if (d < SEPARATION_RADIUS) { sepX += dx / d / d; sepY += dy / d / d; }
+          aliX += o.vx; aliY += o.vy; nAli++;
+          cohX += o.x;  cohY += o.y;  nCoh++;
+        }
+
+        let ax = 0, ay = 0;
+
+        if (sepX || sepY) {
+          const [sx, sy] = limitVec(sepX, sepY, MAX_SPEED);
+          const [fx, fy] = limitVec(sx - b.vx, sy - b.vy, MAX_FORCE);
+          ax += fx * 1.8; ay += fy * 1.8;
+        }
+        if (nAli) {
+          aliX /= nAli; aliY /= nAli;
+          const [sx, sy] = limitVec(aliX, aliY, MAX_SPEED);
+          const [fx, fy] = limitVec(sx - b.vx, sy - b.vy, MAX_FORCE);
+          ax += fx; ay += fy;
+        }
+        if (nCoh) {
+          cohX = cohX / nCoh - b.x;
+          cohY = cohY / nCoh - b.y;
+          const [sx, sy] = limitVec(cohX, cohY, MAX_SPEED);
+          const [fx, fy] = limitVec(sx - b.vx, sy - b.vy, MAX_FORCE);
+          ax += fx * 0.55; ay += fy * 0.55;
+        }
+
+        const mdx = b.x - mouseX, mdy = b.y - mouseY;
+        const md = Math.hypot(mdx, mdy);
+        if (md < MOUSE_REPEL_RADIUS && md > 0.0001) {
+          const k = (1 - md / MOUSE_REPEL_RADIUS) * MOUSE_REPEL_FORCE;
+          ax += (mdx / md) * k; ay += (mdy / md) * k;
+        }
+
+        b.vx += ax; b.vy += ay;
+
+        const sp = Math.hypot(b.vx, b.vy);
+        if (sp > MAX_SPEED) { b.vx = (b.vx / sp) * MAX_SPEED; b.vy = (b.vy / sp) * MAX_SPEED; }
+        else if (sp < MIN_SPEED) {
+          if (sp < 0.0001) { const a = Math.random() * Math.PI * 2; b.vx = Math.cos(a) * MIN_SPEED; b.vy = Math.sin(a) * MIN_SPEED; }
+          else { b.vx = (b.vx / sp) * MIN_SPEED; b.vy = (b.vy / sp) * MIN_SPEED; }
+        }
+
+        b.x += b.vx; b.y += b.vy;
+        if (b.x < -5) b.x = W + 5; else if (b.x > W + 5) b.x = -5;
+        if (b.y < -5) b.y = H + 5; else if (b.y > H + 5) b.y = -5;
+      }
+    },
+    draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(147, 197, 253, 0.55)';
+      for (let i = 0; i < boids.length; i++) {
+        const b = boids[i];
+        const ang = Math.atan2(b.vy, b.vx);
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(ang);
+        ctx.beginPath();
+        ctx.moveTo(6, 0); ctx.lineTo(-4, 3); ctx.lineTo(-4, -3); ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    },
+  };
+})();
+
+// ============ GAME OF LIFE ============
+const lifeSim = (() => {
+  const CELL = 10;
+  const TICK_MS = 110;
+  let cw = 0, ch = 0;
+  let cells = null, next = null;
+  let density = 0.22;
+  let lastTick = 0;
+
+  function seed() {
+    cw = Math.ceil(W / CELL);
+    ch = Math.ceil(H / CELL);
+    cells = new Uint8Array(cw * ch);
+    next = new Uint8Array(cw * ch);
+    for (let i = 0; i < cells.length; i++) cells[i] = Math.random() < density ? 1 : 0;
+  }
+
+  function tick() {
+    for (let y = 0; y < ch; y++) {
+      const ym1 = (y - 1 + ch) % ch;
+      const yp1 = (y + 1) % ch;
+      for (let x = 0; x < cw; x++) {
+        const xm1 = (x - 1 + cw) % cw;
+        const xp1 = (x + 1) % cw;
+        const n = cells[ym1 * cw + xm1] + cells[ym1 * cw + x] + cells[ym1 * cw + xp1]
+                + cells[y   * cw + xm1] +                           cells[y   * cw + xp1]
+                + cells[yp1 * cw + xm1] + cells[yp1 * cw + x] + cells[yp1 * cw + xp1];
+        const alive = cells[y * cw + x];
+        next[y * cw + x] = (alive ? (n === 2 || n === 3) : (n === 3)) ? 1 : 0;
+      }
+    }
+    const tmp = cells; cells = next; next = tmp;
+  }
+
+  return {
+    label: 'density', min: 5, max: 60, step: 5, default: 22,
+    init(d) { density = d / 100; seed(); lastTick = performance.now(); },
+    onResize() { seed(); },
+    setCount(d) { density = d / 100; seed(); },
+    step(t) {
+      if (REDUCED) return;
+      if (t - lastTick < TICK_MS) return;
+      lastTick = t;
+      tick();
+    },
+    draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(96, 165, 250, 0.55)';
+      const pad = 1;
+      const s = CELL - pad * 2;
+      for (let y = 0; y < ch; y++) {
+        for (let x = 0; x < cw; x++) {
+          if (cells[y * cw + x]) ctx.fillRect(x * CELL + pad, y * CELL + pad, s, s);
+        }
+      }
+    },
+  };
+})();
+
+// ============ PARTICLE LIFE ============
+const particlesSim = (() => {
+  const COLORS = ['#60a5fa', '#a5b4fc', '#93c5fd', '#38bdf8'];
+  const TYPES = COLORS.length;
+  const R_MAX = 80;
+  const R_MIN = 14;
+  const FRICTION = 0.86;
+  const FORCE_SCALE = 0.18;
+  const MAX_SPEED = 2.2;
+  const MOUSE_REPEL_RADIUS = 100;
+  const MOUSE_REPEL_FORCE = 0.5;
+
+  // 4x4 attraction matrix, values in roughly [-1, 1]
+  const M = [
+    [ 0.55, -0.25, -0.15,  0.20],
+    [-0.20,  0.50,  0.30, -0.10],
+    [ 0.15, -0.20,  0.55,  0.30],
+    [-0.30,  0.15, -0.20,  0.45],
+  ];
+
+  let parts = [];
+
+  function spawn() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: 0, vy: 0,
+      t: Math.floor(Math.random() * TYPES),
+    };
+  }
+
+  return {
+    label: 'particles', min: 30, max: 300, step: 10, default: 160,
+    init(n) { parts = []; for (let i = 0; i < n; i++) parts.push(spawn()); },
+    onResize() { /* particles stay in place; wrap will sort it out */ },
+    setCount(n) {
+      if (n > parts.length) { while (parts.length < n) parts.push(spawn()); }
+      else if (n < parts.length) { parts.length = n; }
+    },
+    step() {
+      const r2 = R_MAX * R_MAX;
+      for (let i = 0; i < parts.length; i++) {
+        const a = parts[i];
+        let ax = 0, ay = 0;
+        for (let j = 0; j < parts.length; j++) {
+          if (i === j) continue;
+          const b = parts[j];
+          let dx = b.x - a.x, dy = b.y - a.y;
+          // wrap-aware delta (toroidal)
+          if (dx > W * 0.5) dx -= W; else if (dx < -W * 0.5) dx += W;
+          if (dy > H * 0.5) dy -= H; else if (dy < -H * 0.5) dy += H;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > r2 || d2 < 0.0001) continue;
+          const d = Math.sqrt(d2);
+          let f;
+          if (d < R_MIN) {
+            // hard repulsion when too close
+            f = (d / R_MIN - 1);
+          } else {
+            // tent-shaped attraction peaking midway
+            const t = (d - R_MIN) / (R_MAX - R_MIN);
+            f = M[a.t][b.t] * (1 - Math.abs(2 * t - 1));
+          }
+          ax += (dx / d) * f;
+          ay += (dy / d) * f;
+        }
+
+        // mouse repulsion
+        let mdx = a.x - mouseX, mdy = a.y - mouseY;
+        const md = Math.hypot(mdx, mdy);
+        if (md < MOUSE_REPEL_RADIUS && md > 0.0001) {
+          const k = (1 - md / MOUSE_REPEL_RADIUS) * MOUSE_REPEL_FORCE;
+          ax += (mdx / md) * k;
+          ay += (mdy / md) * k;
+        }
+
+        a.vx = (a.vx + ax * FORCE_SCALE) * FRICTION;
+        a.vy = (a.vy + ay * FORCE_SCALE) * FRICTION;
+
+        const sp = Math.hypot(a.vx, a.vy);
+        if (sp > MAX_SPEED) { a.vx = (a.vx / sp) * MAX_SPEED; a.vy = (a.vy / sp) * MAX_SPEED; }
+      }
+      for (let i = 0; i < parts.length; i++) {
+        const a = parts[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0) a.x += W; else if (a.x >= W) a.x -= W;
+        if (a.y < 0) a.y += H; else if (a.y >= H) a.y -= H;
+      }
+    },
+    draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalAlpha = 0.75;
+      for (let i = 0; i < parts.length; i++) {
+        const a = parts[i];
+        ctx.fillStyle = COLORS[a.t];
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    },
+  };
+})();
+
+// ---------- Sim registry + switcher ----------
+const sims = { boids: boidsSim, life: lifeSim, particles: particlesSim };
+const SIM_LABELS = { boids: 'Boids', life: 'Game of Life', particles: 'Particle Life' };
+let currentSim = null;
+let currentSimName = 'boids';
+
+const simRange = document.getElementById('sim-range');
+const simCount = document.getElementById('sim-count');
+const simLabel = document.getElementById('sim-label');
+const simBtn = document.getElementById('sim-btn');
+const simMenu = document.getElementById('sim-menu');
+const simCurrent = document.querySelector('.sim-current');
+
+function selectSim(name, paramOverride) {
+  if (!sims[name]) name = 'boids';
+  currentSimName = name;
+  currentSim = sims[name];
+
+  const value = paramOverride != null
+    ? Math.max(currentSim.min, Math.min(currentSim.max, paramOverride))
+    : currentSim.default;
+
+  simRange.min = String(currentSim.min);
+  simRange.max = String(currentSim.max);
+  simRange.step = String(currentSim.step);
+  simRange.value = String(value);
+  simCount.textContent = String(value);
+  simLabel.textContent = currentSim.label;
+  simCurrent.textContent = SIM_LABELS[name];
+
+  document.querySelectorAll('.sim-menu [data-sim]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.sim === name);
+  });
+
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = 'rgba(147, 197, 253, 0.55)';
-  for (let i = 0; i < boids.length; i++) {
-    const b = boids[i];
-    const ang = Math.atan2(b.vy, b.vx);
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.rotate(ang);
-    ctx.beginPath();
-    ctx.moveTo(6, 0);
-    ctx.lineTo(-4, 3);
-    ctx.lineTo(-4, -3);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  }
+  currentSim.init(value);
+
+  try {
+    localStorage.setItem('simType', name);
+    localStorage.setItem('simParam_' + name, String(value));
+  } catch (_) {}
 }
 
-function frame() {
-  step();
-  drawBoids();
+function setSimMenuOpen(open) {
+  simMenu.classList.toggle('open', open);
+  simBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+simBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  setSimMenuOpen(!simMenu.classList.contains('open'));
+});
+simMenu.querySelectorAll('[data-sim]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    let saved = null;
+    try { saved = parseInt(localStorage.getItem('simParam_' + btn.dataset.sim), 10); } catch (_) {}
+    selectSim(btn.dataset.sim, Number.isFinite(saved) ? saved : null);
+    setSimMenuOpen(false);
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.sim-select')) setSimMenuOpen(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') setSimMenuOpen(false);
+});
+
+simRange.addEventListener('input', () => {
+  const n = parseInt(simRange.value, 10);
+  simCount.textContent = String(n);
+  if (currentSim) currentSim.setCount(n);
+  try { localStorage.setItem('simParam_' + currentSimName, String(n)); } catch (_) {}
+});
+
+window.addEventListener('resize', () => {
+  resize();
+  if (currentSim) currentSim.onResize();
+});
+
+// ---------- Init sim ----------
+let initialSim = 'boids';
+try {
+  const savedSim = localStorage.getItem('simType');
+  if (savedSim && sims[savedSim]) initialSim = savedSim;
+} catch (_) {}
+let initialParam = null;
+try {
+  const p = parseInt(localStorage.getItem('simParam_' + initialSim), 10);
+  if (Number.isFinite(p)) initialParam = p;
+} catch (_) {}
+selectSim(initialSim, initialParam);
+
+// ---------- Main loop ----------
+function frame(t) {
+  if (currentSim) {
+    currentSim.step(t || performance.now());
+    currentSim.draw();
+  }
   if (!REDUCED) requestAnimationFrame(frame);
 }
-if (REDUCED) drawBoids();
-else frame();
+if (REDUCED) { if (currentSim) currentSim.draw(); }
+else requestAnimationFrame(frame);
