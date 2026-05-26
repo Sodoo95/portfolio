@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sodo-Hikaru — Portfolio</title>
+  <meta name="description" content="Sodo-Hikaru — C++ / CUDA / OpenGL developer based in Tokyo. Simulations, games, and ECS experiments." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+  <nav class="nav">
+    <a href="#top" class="logo">
+      <span class="logo-bracket">&lt;</span>
+      <span class="logo-name">sodo</span>
+      <span class="logo-bracket">/&gt;</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">about</a></li>
+      <li><a href="#skills">skills</a></li>
+      <li><a href="#projects">projects</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </nav>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="hero-greeting reveal">// hello, world</p>
+        <h1 class="hero-title reveal">
+          <span class="word">Sodo</span>
+          <span class="word gradient">Hikaru</span>
+        </h1>
+        <div class="hero-typed reveal">
+          <span class="prompt">&gt;</span>
+          <span id="typed-text"></span>
+          <span class="caret">_</span>
+        </div>
+        <p class="hero-bio reveal">
+          Building simulations, games, and graphics experiments in C++, CUDA, and OpenGL —
+          chasing the line between math, performance, and pixels.
+        </p>
+        <div class="hero-meta reveal">
+          <span class="chip"><span class="dot"></span>Tokyo, JP</span>
+          <span class="chip"><span class="dot pulse"></span>Available for collaboration</span>
+        </div>
+        <div class="hero-cta reveal">
+          <a href="#projects" class="btn btn-primary">
+            <span>View Projects</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="https://github.com/Sodoo95" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.92-.39 2.91-.39s1.99.13 2.91.39c2.21-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.26 5.69.41.36.78 1.07.78 2.16v3.2c0 .31.21.67.8.55C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true">
+        <span>scroll</span>
+        <div class="scroll-bar"><div class="scroll-fill"></div></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <div class="section-head reveal">
+        <span class="section-num">01</span>
+        <h2>about</h2>
+        <span class="section-rule"></span>
+      </div>
+      <div class="about-grid">
+        <div class="about-card reveal">
+          <p>
+            I'm <strong>Sodo-Hikaru</strong> — a developer from Tokyo who likes to take ideas to their
+            limit and see what happens. Most of my work lives at the intersection of graphics,
+            simulation, and systems programming.
+          </p>
+          <p>
+            Lately I've been pushing ECS architectures, parallel computing with CUDA, and writing my
+            own little games to learn the fundamentals from the ground up.
+          </p>
+          <p class="muted">"Trying to be better everyday."</p>
+        </div>
+        <div class="stats">
+          <div class="stat reveal">
+            <span class="stat-num" data-target="7">0</span>
+            <span class="stat-label">projects</span>
+          </div>
+          <div class="stat reveal">
+            <span class="stat-num" data-target="5">0</span>
+            <span class="stat-label">years coding</span>
+          </div>
+          <div class="stat reveal">
+            <span class="stat-num" data-target="100" data-suffix="%">0</span>
+            <span class="stat-label">caffeine</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section">
+      <div class="section-head reveal">
+        <span class="section-num">02</span>
+        <h2>skills</h2>
+        <span class="section-rule"></span>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card reveal" data-tilt>
+          <div class="skill-icon">⚙️</div>
+          <h3>Languages</h3>
+          <ul>
+            <li><span>C++</span><span class="pct">90%</span></li>
+            <li><span>CUDA</span><span class="pct">70%</span></li>
+            <li><span>C</span><span class="pct">75%</span></li>
+            <li><span>HTML / CSS / JS</span><span class="pct">60%</span></li>
+          </ul>
+        </div>
+        <div class="skill-card reveal" data-tilt>
+          <div class="skill-icon">🎮</div>
+          <h3>Graphics & Game</h3>
+          <ul>
+            <li><span>OpenGL</span><span class="pct">75%</span></li>
+            <li><span>Raylib</span><span class="pct">80%</span></li>
+            <li><span>SFML</span><span class="pct">70%</span></li>
+            <li><span>WinAPI</span><span class="pct">75%</span></li>
+          </ul>
+        </div>
+        <div class="skill-card reveal" data-tilt>
+          <div class="skill-icon">🧠</div>
+          <h3>Concepts</h3>
+          <ul>
+            <li><span>ECS Architecture</span><span class="pct">80%</span></li>
+            <li><span>Parallel Computing</span><span class="pct">70%</span></li>
+            <li><span>Simulations</span><span class="pct">80%</span></li>
+            <li><span>Game Loop / Math</span><span class="pct">75%</span></li>
+          </ul>
+        </div>
+        <div class="skill-card reveal" data-tilt>
+          <div class="skill-icon">🛠️</div>
+          <h3>Tools</h3>
+          <ul>
+            <li><span>Git</span><span class="pct">80%</span></li>
+            <li><span>Visual Studio</span><span class="pct">85%</span></li>
+            <li><span>CMake</span><span class="pct">65%</span></li>
+            <li><span>VS Code</span><span class="pct">85%</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section">
+      <div class="section-head reveal">
+        <span class="section-num">03</span>
+        <h2>projects</h2>
+        <span class="section-rule"></span>
+      </div>
+      <div class="projects-grid" id="projects-grid">
+        <!-- Cards injected by JS, with progressive enhancement fallback below -->
+        <noscript>
+          <a class="project-card" href="https://github.com/Sodoo95/3D-Boids-Simulation-Cuda-OpenGL-Raylib" target="_blank" rel="noopener">
+            <h3>3D Boids Simulation</h3>
+            <p>Cuda · OpenGL · Raylib</p>
+          </a>
+        </noscript>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section">
+      <div class="section-head reveal">
+        <span class="section-num">04</span>
+        <h2>contact</h2>
+        <span class="section-rule"></span>
+      </div>
+      <div class="contact-wrap reveal">
+        <h3 class="contact-title">Let's build something <span class="gradient">interesting</span>.</h3>
+        <p class="contact-sub">Open to collaboration, freelance, and weird side projects.</p>
+        <div class="contact-actions">
+          <a class="btn btn-primary" href="https://github.com/Sodoo95" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.92-.39 2.91-.39s1.99.13 2.91.39c2.21-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.26 5.69.41.36.78 1.07.78 2.16v3.2c0 .31.21.67.8.55C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+            <span>@Sodoo95</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Sodo-Hikaru</span>
+    <span class="muted">Built with vanilla HTML / CSS / JS</span>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
