@@ -620,7 +620,7 @@ function renderDiagram(d) {
   let svg = `<svg viewBox="0 0 ${VBW} ${VBH}" xmlns="http://www.w3.org/2000/svg" class="diagram-svg" role="img" aria-label="Architecture diagram">
     <defs>
       <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-        <path d="M0,0 L10,5 L0,10 Z" fill="#3b82f6" />
+        <path d="M0,0 L10,5 L0,10 Z" fill="#b46a55" />
       </marker>
     </defs>`;
 
@@ -632,7 +632,7 @@ function renderDiagram(d) {
     const dash = e.dashed ? ' stroke-dasharray="5 4"' : '';
     let labelX, labelY;
     if (forward) {
-      svg += `<line x1="${a.cx}" y1="${a.y + a.h}" x2="${b.cx}" y2="${b.y - 2}" stroke="#3b82f6" stroke-width="1.5" opacity="0.7" marker-end="url(#arr)"${dash} />`;
+      svg += `<line x1="${a.cx}" y1="${a.y + a.h}" x2="${b.cx}" y2="${b.y - 2}" stroke="#b46a55" stroke-width="1.5" opacity="0.8" marker-end="url(#arr)"${dash} />`;
       labelX = a.cx;
       labelY = (a.y + a.h + b.y) / 2;
     } else {
@@ -641,22 +641,22 @@ function renderDiagram(d) {
       const p2 = `${sideX},${a.cy}`;
       const p3 = `${sideX},${b.cy}`;
       const p4 = `${b.x + b.w + 2},${b.cy}`;
-      svg += `<polyline points="${p1} ${p2} ${p3} ${p4}" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="0.55" marker-end="url(#arr)"${dash} />`;
+      svg += `<polyline points="${p1} ${p2} ${p3} ${p4}" fill="none" stroke="#b46a55" stroke-width="1.5" opacity="0.6" marker-end="url(#arr)"${dash} />`;
       labelX = sideX;
       labelY = (a.cy + b.cy) / 2;
     }
     if (e.label) {
       const lbl = escapeXml(e.label);
-      svg += `<g><rect x="${labelX - 38}" y="${labelY - 9}" width="76" height="18" rx="4" fill="#0d0d14" stroke="rgba(255,255,255,0.12)" /><text x="${labelX}" y="${labelY + 4}" text-anchor="middle" fill="#93c5fd" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="10">${lbl}</text></g>`;
+      svg += `<g><rect x="${labelX - 38}" y="${labelY - 9}" width="76" height="18" fill="#0b1320" stroke="#34415f" /><text x="${labelX}" y="${labelY + 4}" text-anchor="middle" fill="#c7b8a6" font-family="ui-monospace, monospace" font-size="10">${lbl}</text></g>`;
     }
   }
 
   // Nodes on top
   for (const n of d.nodes) {
     const p = pos[n.id];
-    svg += `<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="10" fill="rgba(59,130,246,0.07)" stroke="#3b82f6" stroke-width="1.5" />`;
+    svg += `<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" fill="rgba(180,106,85,0.12)" stroke="#b46a55" stroke-width="2" />`;
     const label = escapeXml(n.label);
-    svg += `<text x="${p.cx}" y="${p.cy + 4.5}" text-anchor="middle" fill="#e8e8ee" font-family="'Space Grotesk', system-ui, sans-serif" font-size="13" font-weight="500">${label}</text>`;
+    svg += `<text x="${p.cx}" y="${p.cy + 4.5}" text-anchor="middle" fill="#f2efe8" font-family="'VT323', ui-monospace, monospace" font-size="16">${label}</text>`;
   }
 
   return svg + '</svg>';

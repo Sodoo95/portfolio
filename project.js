@@ -52,7 +52,7 @@ function renderProject(lang) {
           ${project.tags.map((tag) => `<span class="project-tag">${escapeHtml(tag)}</span>`).join('')}
         </div>
         <div class="project-hero-meta">
-          <span class="lang" style="--lang-color:${langColors[project.language] || '#3b82f6'}">${escapeHtml(project.language)}</span>
+          <span class="lang" style="--lang-color:${langColors[project.language] || '#b46a55'}">${escapeHtml(project.language)}</span>
           <span class="muted">★ ${project.stars}${project.featured ? ' · featured' : ''}</span>
         </div>
       </div>

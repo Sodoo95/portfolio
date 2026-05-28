@@ -77,7 +77,7 @@ const grid = document.getElementById('projects-grid');
 function renderProjects(lang) {
   if (!grid) return;
   grid.innerHTML = projects.map((p) => `
-    <a class="project-card reveal" href="project.html?p=${encodeURIComponent(p.repo)}" style="--lang-color:${langColors[p.language] || '#3b82f6'}">
+    <a class="project-card reveal" href="project.html?p=${encodeURIComponent(p.repo)}" style="--lang-color:${langColors[p.language] || '#b46a55'}">
       <div class="project-thumb">
         <img src="${gifUrl(p)}" alt="${p.name} preview" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none'" />
       </div>
@@ -235,7 +235,7 @@ const boidsSim = (() => {
     },
     draw() {
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(147, 197, 253, 0.55)';
+      ctx.fillStyle = 'rgba(199, 184, 166, 0.6)';
       for (let i = 0; i < boids.length; i++) {
         const b = boids[i];
         const ang = Math.atan2(b.vy, b.vx);
@@ -298,7 +298,7 @@ const lifeSim = (() => {
     },
     draw() {
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(96, 165, 250, 0.55)';
+      ctx.fillStyle = 'rgba(180, 106, 85, 0.6)';
       const pad = 1;
       const s = CELL - pad * 2;
       for (let y = 0; y < ch; y++) {
@@ -312,7 +312,7 @@ const lifeSim = (() => {
 
 // ============ PARTICLE LIFE ============
 const particlesSim = (() => {
-  const COLORS = ['#60a5fa', '#a5b4fc', '#93c5fd', '#38bdf8'];
+  const COLORS = ['#b46a55', '#c7b8a6', '#d98b73', '#f2efe8'];
   const TYPES = COLORS.length;
   const R_MAX = 80;
   const R_MIN = 14;
