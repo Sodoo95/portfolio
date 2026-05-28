@@ -28,13 +28,13 @@
         <div class="sim-select">
           <button class="sim-btn" id="sim-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Change background simulation">
             <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/></svg>
-            <span class="sim-current">Boids</span>
+            <span class="sim-current">Particle Life</span>
             <svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
           </button>
           <ul class="sim-menu" id="sim-menu" role="menu">
+            <li><button type="button" data-sim="particles" role="menuitem">Particle Life</button></li>
             <li><button type="button" data-sim="boids" role="menuitem">Boids</button></li>
             <li><button type="button" data-sim="life" role="menuitem">Game of Life</button></li>
-            <li><button type="button" data-sim="particles" role="menuitem">Particle Life</button></li>
           </ul>
         </div>
         <label class="sim-slider" title="Adjust simulation">

@@ -336,7 +336,7 @@ const particlesSim = (() => {
   }
 
   return {
-    label: 'particles', min: 30, max: 300, step: 10, default: 160,
+    label: 'particles', min: 30, max: 700, step: 10, default: 250,
     init(n) { parts = []; for (let i = 0; i < n; i++) parts.push(spawn()); },
     onResize() {},
     setCount(n) {
@@ -489,7 +489,7 @@ window.addEventListener('resize', () => {
 });
 
 // ---------- Init sim ----------
-let initialSim = 'boids';
+let initialSim = 'particles';
 try {
   const savedSim = localStorage.getItem('simType');
   if (savedSim && sims[savedSim]) initialSim = savedSim;
